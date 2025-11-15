@@ -1,0 +1,5 @@
+django
+sympy
+matplotlib
+reportlab
+pandas
