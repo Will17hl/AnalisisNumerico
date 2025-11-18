@@ -5,7 +5,7 @@
 
 {% block content %}
     <div class="container mt-4">
-        <h1 class="text-center">Método de Vandermode</h1>
+        <h1 class="text-center">Método de Vandermonde</h1>
 
         <div class="row align-items-start">
             
@@ -13,17 +13,33 @@
                 <form method="post" class="p-4 border rounded shadow">
                     {% csrf_token %}
                     {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary">Calcular</button>
+
+                    <div class="form-text mb-2">
+                        Ingrese hasta 8 puntos.  
+                        Ejemplo:<br>
+                        X: <code>0 1 2 3</code><br>
+                        Y: <code>1 2 0 5</code>
+                    </div>
+
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox"
+                               name="generar_informe" id="generar_informe" checked>
+                        <label class="form-check-label" for="generar_informe">
+                            Generar informe de ejecución y comparación de errores
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary mt-3">Calcular</button>
                 </form>
                 
                 <div class="mt-3">
-                    <a href="https://es.wikipedia.org/wiki/Reglas_de_derivación" class="btn btn-link" target="_blank">Como derivar</a>
-                    <a href="https://www.calculadora-de-derivadas.com" class="btn btn-link" target="_blank">Calculadora de derivadas</a>
+                    <a href="https://es.wikipedia.org/wiki/Polinomio_interpolante" class="btn btn-link" target="_blank">Info sobre interpolación</a>
                 </div>
             </div>
             
             <div class="col-md-6 text-center">
-                <img src="{% static 'formulas/images/Entrada_int_v.png' %}" class="img-fluid rounded" alt="Entrada vandermonde">
+                <img src="{% static 'formulas/images/Entrada_int_v.png' %}"
+                     class="img-fluid rounded" alt="Entrada Vandermonde">
                 <p style="margin-top: 10px; font-size: 14px; color: #555;">
                     <strong>Nota:</strong> recuerde poner el mismo número de puntos en <strong>X</strong> que en <strong>Y</strong>.
                 </p>
@@ -31,4 +47,3 @@
         </div>
     </div>
 {% endblock %}
-

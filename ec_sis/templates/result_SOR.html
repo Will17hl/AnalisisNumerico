@@ -1,10 +1,10 @@
 {% extends "layout/base.html" %}
 
-{% block title %}Resultado Método de SOR{% endblock %}
+{% block title %}Resultado Método SOR{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h1 class="text-center">Resultado del Método de SOR</h1>
+    <h1 class="text-center">Resultado del Método SOR</h1>
 
     {% if resultado %}
         <div class="card mt-4">
@@ -13,15 +13,27 @@
             </div>
             <div class="card-body">
                 <p><strong>Vector solución:</strong> {{ resultado.solucion }}</p>
-                <p><strong>Radio espectral:</strong> {{ resultado.radio }}. {{ resultado.convergencia }}</p>
+                <p>
+                    <strong>Radio espectral:</strong>
+                    {{ resultado.radio }}. {{ resultado.convergencia }}
+                </p>
 
                 {{ tabla|safe }}
+
+                {% if resultado.informe %}
+                    {{ resultado.informe|safe }}
+                {% endif %}
+
+                {% if resultado.comparacion_errores %}
+                    <h3 class="mt-4">Comparación de tipos de error</h3>
+                    {{ resultado.comparacion_errores|safe }}
+                {% endif %}
             </div>
         </div>
     {% endif %}
 
     <div class="mt-4">
-        <a href="/sor" class="btn btn-secondary">Volver</a>
+        <a href="{% url 'SOR' %}" class="btn btn-secondary">Volver</a>
     </div>
 </div>
 {% endblock %}

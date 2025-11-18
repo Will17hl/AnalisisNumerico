@@ -1,6 +1,6 @@
 {% extends "layout/base.html" %}
 
-{% block title %}Resultado Método de Gauss-Seide{% endblock %}
+{% block title %}Resultado Método de Gauss-Seidel{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
@@ -13,9 +13,21 @@
             </div>
             <div class="card-body">
                 <p><strong>Vector solución:</strong> {{ resultado.solucion }}</p>
-                <p><strong>Radio espectral:</strong> {{ resultado.radio }}. {{ resultado.convergencia }}</p>
+                <p>
+                    <strong>Radio espectral:</strong>
+                    {{ resultado.radio }}. {{ resultado.convergencia }}
+                </p>
 
                 {{ tabla|safe }}
+
+                {% if resultado.informe %}
+                    {{ resultado.informe|safe }}
+                {% endif %}
+
+                {% if resultado.comparacion_errores %}
+                    <h3 class="mt-4">Comparación de tipos de error</h3>
+                    {{ resultado.comparacion_errores|safe }}
+                {% endif %}
             </div>
         </div>
     {% endif %}

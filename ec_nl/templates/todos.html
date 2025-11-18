@@ -1,31 +1,60 @@
 {% extends "layout/base.html" %}
 {% load static %}
 
-{% block title %}Todos los métodos{% endblock %}
+{% block title %}Informe comparativo - Capítulo 1{% endblock %}
 
 {% block content %}
     <div class="container mt-4">
-        <h1 class="text-center">Todos los métodos</h1>
+        <h1 class="text-center">Informe de ejecución y comparación</h1>
 
-        <h3 class="text-center">!!Los métodos deben ser continuos!!</h3>
+        <h3 class="text-center">Métodos de búsqueda de raíces (Capítulo 1)</h3>
 
-        <div class="row align-items-start">
+        <p class="mt-3 text-justify">
+            En esta sección puedes generar un <strong>informe automático en PDF</strong> que compara todos los métodos del capítulo 1:
+            <em>Bisección, Regla Falsa, Punto Fijo, Newton, Secante y Raíces Múltiples</em>.
+            El informe se ejecuta con los mismos datos de entrada (intervalo, función, tolerancia,
+            número de iteraciones y tipo de error), mostrando tablas de iteraciones, gráficas y un
+            resumen comparativo indicando <strong>cuál fue el mejor método</strong>.
+        </p>
+
+        <p class="text-muted">
+            Marca la casilla si deseas generar el informe comparativo.  
+            Si no la marcas, simplemente no se generará el PDF.
+        </p>
+
+        <div class="row align-items-start mt-4">
             
             <div class="col-md-6">
                 <form method="post" class="p-4 border rounded shadow">
                     {% csrf_token %}
                     {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary">Calcular</button>
+
+                    <!-- Checkbox para activar o desactivar el informe -->
+                    <div class="form-group mt-2 mb-3">
+                        <label>
+                            <input type="checkbox" name="generar_informe">
+                            Generar informe comparativo en PDF
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Calcular
+                    </button>
                 </form>
                 
                 <div class="mt-3">
-                    <a href="https://es.wikipedia.org/wiki/Reglas_de_derivación" class="btn btn-link" target="_blank">Como derivar</a>
-                    <a href="https://www.calculadora-de-derivadas.com" class="btn btn-link" target="_blank">Calculadora de derivadas</a>
+                    <a href="https://es.wikipedia.org/wiki/Reglas_de_derivación" class="btn btn-link" target="_blank">
+                        Cómo derivar
+                    </a>
+                    <a href="https://www.calculadora-de-derivadas.com" class="btn btn-link" target="_blank">
+                        Calculadora de derivadas
+                    </a>
                 </div>
             </div>
             
             <div class="col-md-6 text-center">
-                <img src="{% static 'formulas/images/Formulas.png' %}" class="img-fluid rounded" alt="Fórmulas del Método de Newton">
+                <img src="{% static 'formulas/images/Formulas.png' %}" class="img-fluid rounded"
+                     alt="Fórmulas para los métodos de raíces">
             </div>
         </div>
     </div>

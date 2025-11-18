@@ -1,30 +1,54 @@
 {% extends "layout/base.html" %}
 
-{% block title %}Resultado Método de Spline Cúbico{% endblock %}
+{% block title %}Resultado del Spline cúbico{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h1 class="text-center">Resultado del Método de Spline Cúbico</h1>
+    <h1 class="text-center">Resultado del Spline cúbico</h1>
 
     {% if resultado %}
         <div class="card mt-4">
             <div class="card-header">
-                <h5>Solución</h5>
+                <h5>Spline solución</h5>
             </div>
             <div class="card-body">
-                <p><strong>Polinomio:</strong> {{ resultado.solucion }}</p>
+                <p><strong>Spline cúbico por tramos S(x):</strong></p>
+                <ul>
+                    {% for tramo in resultado.solucion %}
+                        <li>{{ tramo }}</li>
+                    {% endfor %}
+                </ul>
 
-                <h2>Gráfico de la función</h2>
-                <img src="{{ grafica }}" alt="Gráfico de la función" class="img-fluid">
+                <h2>Gráfico del spline y los puntos</h2>
+                <img src="{{ grafica }}" alt="Gráfico del spline" class="img-fluid">
             </div>
         </div>
 
+        {% if resultado.informe %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Informe de ejecución – Spline cúbico</h5>
+            </div>
+            <div class="card-body">
+                <pre style="white-space: pre-wrap;">{{ resultado.informe }}</pre>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if resultado.comparacion %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Comparación de tipos de error</h5>
+            </div>
+            <div class="card-body">
+                {{ resultado.comparacion|safe }}
+            </div>
+        </div>
+        {% endif %}
     {% endif %}
 
     <div class="mt-4">
-        <a href="/splinecub" class="btn btn-secondary">Volver</a>
+        <a href="{% url 'SplineCub' %}" class="btn btn-secondary">Volver</a>
     </div>
 </div>
 {% endblock %}
-
-

@@ -22,6 +22,7 @@ urlpatterns = [
     path('todos/', ecViews.todos_view, name="Todos"),
     path('jacobi/', ecSViews.jacobi_view, name="Jacobi"),
     path('gausseidel/', ecSViews.gausseidel_view, name='Gausseidel'),
+    path('SOR/', ecSViews.SOR_view),
     path('sor/', ecSViews.SOR_view, name='SOR'),
     path('todosNL/', ecSViews.todos_view, name="Todos"),
     path('vander/', interpViews.vander_view, name='Vandermonde'),

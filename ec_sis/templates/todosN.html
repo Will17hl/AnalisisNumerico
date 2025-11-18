@@ -13,6 +13,14 @@
                 <form method="post" class="p-4 border rounded shadow">
                     {% csrf_token %}
                     {{ form.as_p }}
+
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" name="generar_informe" id="generar_informe" checked>
+                        <label class="form-check-label" for="generar_informe">
+                            Generar informe de ejecución para el método de Jacobi
+                        </label>
+                    </div>
+                    
                     <button type="submit" class="btn btn-primary">Calcular</button>
                 </form>
                 
@@ -27,4 +35,37 @@
             </div>
         </div>
     </div>
+
+    {% if resultados %}
+    <hr class="mt-4">
+    <h2>Resultados de los métodos</h2>
+
+    <table class="table table-striped text-center">
+        <thead>
+            <tr>
+                <th>Método</th>
+                <th>Solución aproximada</th>
+                <th>Radio espectral</th>
+                <th>Iteraciones</th>
+                <th>Tiempo (s)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for nombre, datos in resultados.items %}
+                <tr>
+                    <td>{{ nombre }}</td>
+                    <td>{{ datos.solucion }}</td>
+                    <td>{{ datos.radio }}</td>
+                    <td>{{ datos.iteraciones }}</td>
+                    <td>{{ datos.tiempo }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if mensaje_final %}
+        <p><strong>{{ mensaje_final }}</strong></p>
+    {% endif %}
+{% endif %}
+
 {% endblock %}

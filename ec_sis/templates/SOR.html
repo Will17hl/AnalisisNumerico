@@ -13,6 +13,14 @@
                 <form method="post" class="p-4 border rounded shadow">
                     {% csrf_token %}
                     {{ form.as_p }}
+                    
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" name="generar_informe" id="generar_informe" checked>
+                        <label class="form-check-label" for="generar_informe">
+                            Generar informe de ejecución para el método de Gauss-Seidel
+                        </label>
+                    </div>
+
                     <button type="submit" class="btn btn-primary">Calcular</button>
                 </form>
                 

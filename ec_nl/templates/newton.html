@@ -15,7 +15,15 @@
                 <form method="post" class="p-4 border rounded shadow">
                     {% csrf_token %}
                     {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary">Calcular</button>
+
+                    <div class="form-group mt-3">
+                        <label>
+                            <input type="checkbox" name="correr_informe">
+                            Generar informe de ejecución para el método de Newton
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary mt-2">Calcular</button>
                 </form>
                 
                 <div class="mt-3">

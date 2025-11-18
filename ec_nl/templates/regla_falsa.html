@@ -15,6 +15,16 @@
                 <form method="post" class="p-4 border rounded shadow">
                     {% csrf_token %}
                     {{ form.as_p }}
+
+                    <div class="form-check mt-3">
+                        <input type="checkbox"
+                            class="form-check-input"
+                            id="correr_informe"
+                            name="correr_informe">
+                        <label class="form-check-label" for="correr_informe">
+                            Generar informe de ejecución para el método de Regla Falsa
+                        </label>
+                    </div>
                     <button type="submit" class="btn btn-primary">Calcular</button>
                 </form>
                 

@@ -1,14 +1,74 @@
 {% extends "layout/base.html" %}
+{% load static %}
 
-{% block title %}Método de la Regla Falsa{% endblock %}
+{% block title %}Resultado del Método de Regla Falsa{% endblock %}
 
 {% block content %}
-    <h1>Resultado del Método de la Regla Falsa</h1>
-    <p>{{ resultado }}</p>
-    {{ tabla|safe }}
-    
-    <h2>Gráfico de la función</h2>
-    <img src="{{ imagen }}" alt="Gráfico de la función" class="img-fluid">
-    
-    <a href="/reglafalsa/">Realizar otro cálculo</a>
+<div class="container mt-4">
+    <h1 class="text-center">Resultado del Método de Regla Falsa</h1>
+    <p class="text-center text-muted">
+        Resultado: {{ resultado }}
+    </p>
+
+    <!-- Tabla de iteraciones -->
+    <h4>Tabla de iteraciones</h4>
+    <div class="table-responsive">
+        {{ tabla|safe }}
+    </div>
+
+    <!-- Gráfica -->
+    {% if imagen %}
+        <h4 class="mt-4">Gráfico de la función</h4>
+        <div class="text-center">
+            <img src="{{ imagen }}" alt="Gráfica Regla Falsa" class="img-fluid">
+        </div>
+    {% endif %}
+
+    <!-- Informe de ejecución -->
+    {% if informe %}
+        <hr class="my-5">
+        <h2>Informe de ejecución - Método de Regla Falsa</h2>
+
+        <p>{{ informe.texto }}</p>
+
+        <ul>
+            <li><strong>Iteraciones realizadas:</strong> {{ informe.n_iter_real }}</li>
+            <li><strong>Aproximación final de la raíz:</strong> {{ informe.xm_final }}</li>
+            <li><strong>Error final ({{ informe.tipo_error }}):</strong> {{ informe.error_final }}</li>
+            <li><strong>¿Cumplió la tolerancia?</strong>
+                {% if informe.convergio_por_tol %}Sí{% else %}No{% endif %}
+            </li>
+        </ul>
+
+        <h3>Comparación de tipos de error</h3>
+        <div class="table-responsive">
+            <table class="table table-striped text-center">
+                <thead>
+                    <tr>
+                        <th>Tipo de error</th>
+                        <th>x<sub>final</sub></th>
+                        <th>f(x<sub>final</sub>)</th>
+                        <th>Error final</th>
+                        <th>Tiempo (s)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fila in informe.comparacion_errores %}
+                        <tr>
+                            <td>{{ fila.tipo }}</td>
+                            <td>{{ fila.x_final }}</td>
+                            <td>{{ fila.fx_final }}</td>
+                            <td>{{ fila.error_final }}</td>
+                            <td>{{ fila.tiempo }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{% url 'Regla Falsa' %}" class="btn btn-secondary">Realizar otro cálculo</a>
+    </div>
+</div>
 {% endblock %}

@@ -1,30 +1,50 @@
 {% extends "layout/base.html" %}
 
-{% block title %}Resultado Método de Spline Linear{% endblock %}
+{% block title %}Resultado Spline lineal{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h1 class="text-center">Resultado del Método de Spline Linear</h1>
+    <h1 class="text-center">Resultado del Spline lineal</h1>
 
     {% if resultado %}
         <div class="card mt-4">
             <div class="card-header">
-                <h5>Solución</h5>
+                <h5>Spline solución</h5>
             </div>
             <div class="card-body">
-                <p><strong>Polinomio:</strong> {{ resultado.solucion }}</p>
+                <p><strong>Spline lineal por tramos p(x):</strong></p>
+                <pre>{{ resultado.solucion }}</pre>
 
-                <h2>Gráfico de la función</h2>
-                <img src="{{ grafica }}" alt="Gráfico de la función" class="img-fluid">
+                <h5 class="mt-4">Gráfico del spline y los puntos</h5>
+                <img src="{{ resultado.grafica }}" alt="Gráfico de la función" class="img-fluid">
             </div>
         </div>
 
+        {% if resultado.informe %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Informe de ejecución – Spline lineal</h5>
+            </div>
+            <div class="card-body">
+                {{ resultado.informe|safe }}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if resultado.comparacion %}
+        <div class="card mt-4 mb-4">
+            <div class="card-header">
+                <h5>Comparación de tipos de error</h5>
+            </div>
+            <div class="card-body">
+                {{ resultado.comparacion|safe }}
+            </div>
+        </div>
+        {% endif %}
     {% endif %}
 
-    <div class="mt-4">
-        <a href="/splinelin" class="btn btn-secondary">Volver</a>
+    <div class="mt-4 mb-5">
+        <a href="{% url 'SplineLin' %}" class="btn btn-secondary">Volver</a>
     </div>
 </div>
 {% endblock %}
-
-

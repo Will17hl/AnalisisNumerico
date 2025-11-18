@@ -15,6 +15,12 @@
                 <form method="post" class="p-4 border rounded shadow">
                     {% csrf_token %}
                     {{ form.as_p }}
+                <div class="form-group mt-2">
+                    <label>
+                        <input type="checkbox" name="correr_informe">
+                        Generar informe de ejecución para el método de Punto Fijo
+                    </label>
+                </div>
                     <button type="submit" class="btn btn-primary">Calcular</button>
                 </form>
             

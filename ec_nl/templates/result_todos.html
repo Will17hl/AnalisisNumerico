@@ -1,0 +1,33 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Resultados de todos los métodos{% endblock %}
+
+{% block content %}
+  <h1>Resultados de todos los métodos (Capítulo 1)</h1>
+
+  <p>
+    Función: <code>{{ fun }}</code><br>
+    Intervalo: [{{ a }}, {{ b }}]<br>
+    Tolerancia: {{ tol }}<br>
+    Iteraciones máximas: {{ niter }}<br>
+    Criterio de error: {{ tipo_error }}
+  </p>
+
+  <hr>
+
+  {% for nombre, datos in resultados.items %}
+    <h2>{{ nombre }}</h2>
+    <p>{{ datos.mensaje }}</p>
+
+    {{ datos.tabla|safe }}
+
+    {% if datos.imagen %}
+      <h4>Gráfica</h4>
+      <img src="{{ datos.imagen }}" class="img-fluid" alt="Gráfica {{ nombre }}">
+    {% endif %}
+
+    <hr>
+  {% endfor %}
+
+  <a href="/todos/" class="btn btn-secondary mt-3">Volver</a>
+{% endblock %}

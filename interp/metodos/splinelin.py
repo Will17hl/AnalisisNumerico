@@ -1,7 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import io
+import pandas as pd
 import base64
+import time
 
 def spline_lineal(x, y):
 
@@ -129,3 +131,107 @@ def graficar_lineal(x, y, tabla):
     plt.close()
 
     return img_uri
+
+def _calcular_errores_spline_lineal(x, y):
+    """
+    Calcula los errores del spline lineal.
+    Usamos np.interp(x, x, y), que es exactamente el spline lineal evaluado en los nodos.
+    """
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+
+    t0 = time.perf_counter()
+    # Spline lineal evaluado en los nodos: debe dar exactamente y
+    y_aprox = np.interp(x, x, y)
+    t1 = time.perf_counter()
+    tiempo = t1 - t0
+
+    errores_abs = np.abs(y - y_aprox)
+    errores_rel = errores_abs / np.maximum(np.abs(y), 1e-15)
+    rmse = np.sqrt(np.mean((y - y_aprox) ** 2))
+
+    return {
+        "y_aprox": y_aprox,
+        "errores_abs": errores_abs,
+        "errores_rel": errores_rel,
+        "rmse": rmse,
+        "tiempo": tiempo,
+    }
+
+
+def generar_informe_spline_lineal(x, y, descripcion_tramos):
+    """
+    Genera el informe de ejecución en HTML para el método de spline lineal.
+    """
+    try:
+        info = _calcular_errores_spline_lineal(x, y)
+    except Exception as e:
+        return f"<p><b>Error al generar el informe de Spline lineal:</b> {e}</p>"
+
+    errores_abs = info["errores_abs"]
+    errores_rel = info["errores_rel"]
+    rmse = info["rmse"]
+    tiempo = info["tiempo"]
+
+    n = len(x)
+
+    informe = f"""
+    <h3>Informe de ejecución – Método de Spline lineal</h3>
+    <p>Se aplicó el método de interpolación por spline lineal para los datos (x, y) con n = {n} puntos,
+    construyendo un polinomio por tramos de grado 1 en cada intervalo [xᵢ, xᵢ₊₁].</p>
+
+    <p>El spline lineal obtenido (por tramos) es:</p>
+    <pre>{descripcion_tramos}</pre>
+
+    <p>Al evaluar el spline lineal en los datos originales se obtuvo:</p>
+    <ul>
+        <li>Error absoluto máximo: {errores_abs.max():.6e}</li>
+        <li>Error absoluto promedio: {errores_abs.mean():.6e}</li>
+        <li>Error relativo máximo: {errores_rel.max():.6e}</li>
+        <li>RMSE (raíz del error cuadrático medio): {rmse:.6e}</li>
+        <li>Tiempo de ejecución: {tiempo:.6f} s</li>
+    </ul>
+    """
+
+    return informe
+
+
+def generar_comparacion_errores_spline_lineal(x, y):
+    """
+    Devuelve una tabla HTML con la comparación de los tipos de error
+    para el método de Spline lineal.
+    """
+    try:
+        info = _calcular_errores_spline_lineal(x, y)
+    except Exception as e:
+        return f"<p><b>Error al generar la tabla de errores de Spline lineal:</b> {e}</p>"
+
+    errores_abs = info["errores_abs"]
+    errores_rel = info["errores_rel"]
+    rmse = info["rmse"]
+    tiempo = info["tiempo"]
+
+    data = {
+        "Tipo de error": [
+            "Error absoluto máximo",
+            "Error absoluto promedio",
+            "Error relativo máximo",
+            "RMSE (error cuadrático medio)",
+        ],
+        "Valor": [
+            errores_abs.max(),
+            errores_abs.mean(),
+            errores_rel.max(),
+            rmse,
+        ],
+        "Tiempo (s)": [
+            tiempo,
+            tiempo,
+            tiempo,
+            tiempo,
+        ],
+    }
+
+    df = pd.DataFrame(data)
+    tabla_html = df.to_html(index=False, classes="table table-striped text-center")
+    return tabla_html

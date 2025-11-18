@@ -9,22 +9,42 @@
     {% if resultado %}
         <div class="card mt-4">
             <div class="card-header">
-                <h5>Solución</h5>
+                <h5>Polinomio solución</h5>
             </div>
             <div class="card-body">
-                <p><strong>Polinomio:</strong> {{ resultado.solucion }}</p>
+                <p><strong>Polinomio interpolante p(x):</strong></p>
+                <pre>{{ resultado.solucion }}</pre>
 
-                <h2>Gráfico de la función</h2>
-                <img src="{{ grafica }}" alt="Gráfico de la función" class="img-fluid">
+                <h5 class="mt-4">Gráfico del polinomio y los puntos</h5>
+                <img src="{{ resultado.grafica }}" alt="Gráfico de la función" class="img-fluid">
             </div>
         </div>
 
+        {% if resultado.informe %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Informe de ejecución – Método de Vandermonde</h5>
+            </div>
+            <div class="card-body">
+                {{ resultado.informe|safe }}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if resultado.comparacion %}
+        <div class="card mt-4 mb-4">
+            <div class="card-header">
+                <h5>Comparación de tipos de error</h5>
+            </div>
+            <div class="card-body">
+                {{ resultado.comparacion|safe }}
+            </div>
+        </div>
+        {% endif %}
     {% endif %}
 
-    <div class="mt-4">
-        <a href="/vander" class="btn btn-secondary">Volver</a>
+    <div class="mt-4 mb-5">
+        <a href="{% url 'Vandermonde' %}" class="btn btn-secondary">Volver</a>
     </div>
 </div>
 {% endblock %}
-
-

@@ -337,3 +337,194 @@ def punto_fijoCS(X0, Tol, Niter, Fun, g):
     plt.close()
 
     return resultado, df.to_html(index=False, classes='table table-striped text-center'), img_uri
+
+def generar_informe_punto_fijo(df, fun_str, g_str, x0, tol, niter, tipo_error, tiempo=None):
+    """
+    df: DataFrame con las iteraciones del método de Punto Fijo.
+        Esperamos columnas tipo: iteración, x_n, g(x_n) o f(x_n), error.
+    fun_str: f(x) como string (para evaluar f(x_final) si se puede).
+    g_str:  g(x) como string (función de iteración).
+    x0: valor inicial.
+    tol: tolerancia.
+    niter: número máximo de iteraciones.
+    tipo_error: descripción (cifras significativas, error relativo, etc.).
+    tiempo: tiempo total de ejecución en segundos.
+    """
+
+    # Asegurarnos de que tenemos un DataFrame
+    if not isinstance(df, pd.DataFrame):
+        df = pd.DataFrame(df)
+
+    # ---------- Manejo del tiempo ----------
+    if tiempo is not None:
+        tiempo_str = f"{tiempo:.6f}"
+    else:
+        tiempo_str = "--"
+
+    # ---------- Detección de columnas ----------
+    cols = [str(c) for c in df.columns]
+
+    # Iteración (normalmente primera)
+    col_i = cols[0]
+
+    # Columna de x_n
+    posibles_x = ['Xn', 'xn', 'Xi', 'xi', 'x', 'Xm', 'xm']
+    col_x = None
+    for c in cols:
+        if c in posibles_x:
+            col_x = c
+            break
+    if col_x is None and len(cols) >= 2:
+        col_x = cols[1]
+
+    # Columna de g(x_n) o f(x_n)
+    posibles_fx = ['g(Xn)', 'g(xn)', 'g(Xi)', 'g(xi)', 'g(x)',
+                   'f(Xn)', 'f(xn)', 'f(Xi)', 'f(xi)', 'f(x)', 'f(Xm)', 'f(xm)']
+    col_fx = None
+    for c in cols:
+        if c in posibles_fx:
+            col_fx = c
+            break
+    if col_fx is None and len(cols) >= 3:
+        col_fx = cols[2]
+
+    # Columna de Error
+    posibles_err = ['Error', 'error', 'E', 'err', 'Error relativo', 'error relativo']
+    col_err = None
+    for c in cols:
+        if c in posibles_err:
+            col_err = c
+            break
+
+    # ---------- Datos finales ----------
+    n_iter_real = len(df)
+    x_final = df[col_x].iloc[-1]
+    fx_final_tabla = df[col_fx].iloc[-1] if col_fx is not None else None
+
+    if n_iter_real >= 2:
+        x_prev = df[col_x].iloc[-2]
+        delta = x_final - x_prev
+    else:
+        x_prev = x_final
+        delta = 0.0
+
+    # Error según el modo (columna de error si existe)
+    if col_err is not None:
+        error_final_modo = df[col_err].iloc[-1]
+    else:
+        error_final_modo = abs(delta)
+
+    # Tolerancia y niter pueden venir None, así que lo manejamos suave
+    if tol is not None:
+        convergio_por_tol = abs(error_final_modo) <= tol
+    else:
+        convergio_por_tol = False
+
+    if niter is not None:
+        uso_todas_iter = (n_iter_real >= niter)
+    else:
+        uso_todas_iter = False
+
+    # ---------- Texto resumen ----------
+    resumen = []
+
+    resumen.append(
+        f"Se aplicó el método de Punto Fijo a la función f(x) = {fun_str} "
+        f"usando la función de iteración g(x) = {g_str}, con x₀ = {x0} como aproximación inicial, "
+        f"tolerancia {tol} y un máximo de {niter} iteraciones."
+    )
+
+    resumen.append(
+        f"El método realizó {n_iter_real} iteraciones y obtuvo como aproximación final x ≈ {x_final:.8f}."
+    )
+
+    resumen.append(
+        f"El error final ({tipo_error}) fue de aproximadamente {error_final_modo:.2e}."
+    )
+
+    if convergio_por_tol:
+        resumen.append(
+            "La aproximación cumple el criterio de parada especificado por la tolerancia, "
+            "por lo que se considera que el método **convergió adecuadamente**."
+        )
+    else:
+        if uso_todas_iter:
+            resumen.append(
+                "El método alcanzó el número máximo de iteraciones sin cumplir la tolerancia, "
+                "por lo que se considera que **no alcanzó la convergencia deseada**."
+            )
+        else:
+            resumen.append(
+                "La tolerancia no se cumplió estrictamente o el método se detuvo por otra condición de parada."
+            )
+
+    if n_iter_real <= 5:
+        comentario_velocidad = "La convergencia fue muy rápida (pocas iteraciones)."
+    elif n_iter_real <= 15:
+        comentario_velocidad = "La cantidad de iteraciones se considera moderada."
+    else:
+        comentario_velocidad = "La cantidad de iteraciones fue alta, lo que indica una convergencia más lenta."
+
+    resumen.append(comentario_velocidad)
+
+    informe_texto = " ".join(resumen)
+
+    # ---------- Comparación de errores ----------
+    error_decimales = abs(delta)
+    error_relativo = abs(delta / x_final) if x_final != 0 else 0.0
+
+    # Usamos el valor de la tabla como "f(x_final)" o "g(x_final)"
+    if fx_final_tabla is not None:
+        error_fx = abs(fx_final_tabla)
+    else:
+        # Intento de evaluar f(x_final) directamente
+        try:
+            x_val = float(x_final)
+            fx_val = eval(fun_str, {"x": x_val, "math": math})
+            error_fx = abs(fx_val)
+        except Exception:
+            error_fx = None
+
+    comparacion_errores = [
+        {
+            "tipo": "decimales",
+            "x_final": x_final,
+            "fx_final": fx_final_tabla,
+            "error_final": error_decimales,
+            "tiempo": tiempo_str,
+        },
+        {
+            "tipo": "cifras significativas",
+            "x_final": x_final,
+            "fx_final": fx_final_tabla,
+            "error_final": error_relativo,
+            "tiempo": tiempo_str,
+        },
+        {
+            "tipo": "relativo_xnm1",
+            "x_final": x_final,
+            "fx_final": fx_final_tabla,
+            "error_final": error_relativo,
+            "tiempo": tiempo_str,
+        },
+        {
+            "tipo": "fx",
+            "x_final": x_final,
+            "fx_final": fx_final_tabla,
+            "error_final": error_fx,
+            "tiempo": tiempo_str,
+        },
+    ]
+
+    informe = {
+        "texto": informe_texto,
+        "n_iter_real": n_iter_real,
+        "xm_final": x_final,
+        "error_final": error_final_modo,
+        "convergio_por_tol": convergio_por_tol,
+        "uso_todas_iter": uso_todas_iter,
+        "tipo_error": tipo_error,
+        "comparacion_errores": comparacion_errores,
+    }
+
+    return informe

@@ -13,6 +13,12 @@
                 <form method="post" class="p-4 border rounded shadow">
                     {% csrf_token %}
                     {{ form.as_p }}
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" name="generar_informe" id="generar_informe">
+                        <label class="form-check-label" for="generar_informe">
+                            Generar informe de ejecución (PDF)
+                        </label>
+                    </div>
                     <button type="submit" class="btn btn-primary">Calcular</button>
                 </form>
                 
@@ -27,4 +33,66 @@
             </div>
         </div>
     </div>
+
+{% if resultados %}
+    <h3 class="mt-4">Resultados de los métodos</h3>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Método</th>
+                <th>Polinomio / Spline</th>
+                <th>Evaluación en nx</th>
+                <th>Error</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for nombre, datos in resultados.items %}
+                <tr>
+                    <td>{{ nombre }}</td>
+
+                    <td>
+                        {% if datos.pol == "Error" %}
+                            Error en el método
+                        {% elif nombre == "Spline cúbico" or nombre == "Spline lineal" %}
+                            {% for p in datos.pol %}
+                                {{ p }}<br>
+                            {% endfor %}
+                        {% else %}
+                            {{ datos.pol }}
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if datos.eval %}
+                            {% if nombre == "Spline cúbico" or nombre == "Spline lineal" %}
+                                {% for lista in datos.eval %}
+                                    {{ lista }}<br>
+                                {% endfor %}
+                            {% else %}
+                                {{ datos.eval }}
+                            {% endif %}
+                        {% else %}
+                            N/D
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if datos.error is not None %}
+                            {{ datos.error }}
+                        {% else %}
+                            N/D
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if mejor_metodo %}
+        <p><strong>Mejor método según el menor error:</strong> {{ mejor_metodo }}</p>
+    {% endif %}
+{% endif %}
+
+
 {% endblock %}

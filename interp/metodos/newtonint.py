@@ -6,6 +6,7 @@ import math
 import matplotlib.pyplot as plt
 import base64
 import io
+import time
 
 def newtonint(x, y):
     
@@ -155,3 +156,113 @@ def newtonint(x, y):
 
     return poly_str, img_uri
 
+def _calcular_errores_newtonint(x, y, grado):
+    """
+    Calcula errores del polinomio interpolante asociado a Newton.
+    Para los errores usamos el polinomio de interpolación de grado n-1
+    obtenido por polyfit (es el mismo polinomio que Newton).
+    """
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+
+    n = len(x)
+    if grado is None or grado > n - 1:
+        grado = n - 1
+
+    t0 = time.perf_counter()
+
+    # Polinomio interpolante en forma estándar
+    coef = np.polyfit(x, y, grado)
+    y_aprox = np.polyval(coef, x)
+
+    t1 = time.perf_counter()
+    tiempo = t1 - t0
+
+    errores_abs = np.abs(y - y_aprox)
+    errores_rel = errores_abs / np.maximum(np.abs(y), 1e-15)
+    rmse = np.sqrt(np.mean((y - y_aprox) ** 2))
+
+    return {
+        "coeficientes": coef,
+        "y_aprox": y_aprox,
+        "errores_abs": errores_abs,
+        "errores_rel": errores_rel,
+        "rmse": rmse,
+        "tiempo": tiempo,
+    }
+
+
+def generar_informe_newtonint(x, y, grado, polinomio_str):
+    """
+    Genera el informe de ejecución en HTML para el método de Newton interpolante.
+    """
+    try:
+        info = _calcular_errores_newtonint(x, y, grado)
+    except Exception as e:
+        return f"<p><b>Error al generar el informe de Newton interpolante:</b> {e}</p>"
+
+    errores_abs = info["errores_abs"]
+    errores_rel = info["errores_rel"]
+    rmse = info["rmse"]
+    tiempo = info["tiempo"]
+
+    informe = f"""
+    <h3>Informe de ejecución – Método de Newton interpolante</h3>
+    <p>Se aplicó el método de interpolación de Newton para los datos (x, y) con n = {len(x)} puntos,
+    construyendo un polinomio de grado {grado}.</p>
+
+    <p>El polinomio obtenido es:</p>
+    <pre>p(x) = {polinomio_str}</pre>
+
+    <p>Al evaluar el polinomio en los datos originales se obtuvo:</p>
+    <ul>
+        <li>Error absoluto máximo: {errores_abs.max():.6e}</li>
+        <li>Error absoluto promedio: {errores_abs.mean():.6e}</li>
+        <li>Error relativo máximo: {errores_rel.max():.6e}</li>
+        <li>RMSE (raíz del error cuadrático medio): {rmse:.6e}</li>
+        <li>Tiempo de ejecución: {tiempo:.6f} s</li>
+    </ul>
+    """
+
+    return informe
+
+
+def generar_comparacion_errores_newtonint(x, y, grado):
+    """
+    Devuelve una tabla HTML con la comparación de los tipos de error
+    para el método de Newton interpolante.
+    """
+    try:
+        info = _calcular_errores_newtonint(x, y, grado)
+    except Exception as e:
+        return f"<p><b>Error al generar la tabla de errores de Newton interpolante:</b> {e}</p>"
+
+    errores_abs = info["errores_abs"]
+    errores_rel = info["errores_rel"]
+    rmse = info["rmse"]
+    tiempo = info["tiempo"]
+
+    data = {
+        "Tipo de error": [
+            "Error absoluto máximo",
+            "Error absoluto promedio",
+            "Error relativo máximo",
+            "RMSE (error cuadrático medio)",
+        ],
+        "Valor": [
+            errores_abs.max(),
+            errores_abs.mean(),
+            errores_rel.max(),
+            rmse,
+        ],
+        "Tiempo (s)": [
+            tiempo,
+            tiempo,
+            tiempo,
+            tiempo,
+        ],
+    }
+
+    df = pd.DataFrame(data)
+    tabla_html = df.to_html(index=False, classes="table table-striped text-center")
+    return tabla_html

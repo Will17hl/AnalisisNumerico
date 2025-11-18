@@ -21,7 +21,7 @@ def metodo_newton(X0, Tol, Niter, Fun, df_expr):
         c = 0
         f = eval(Fun, {"x": x, "math": math})
         derivada = eval(df_expr, {"x": x, "math": math})
-        Error = 100               
+        Error = 100
         fn.append(f)
         xn.append(x)
         E.append(Error)
@@ -334,3 +334,196 @@ def metodo_newtonCS(X0, Tol, Niter, Fun, df_expr):
     plt.close()
 
     return resultado, tabla_html, img_uri
+
+def generar_informe_newton(df, fun_str, df_str, x0, tol, niter, tipo_error, tiempo=None):
+    """
+    df: DataFrame con las iteraciones del método de Newton.
+        Se espera algo tipo columnas: i, Xn, f(Xn), Error (aunque tratamos de adaptarnos).
+    fun_str: función f(x) como string (ej: "x**3 - x - 2")
+    df_str: derivada f'(x) como string
+    x0: aproximación inicial
+    tol: tolerancia requerida
+    niter: máximo de iteraciones
+    tipo_error: texto del tipo de error (cifras, relativo, etc.)
+    tiempo: tiempo total medido en la vista (segundos)
+    """
+
+    # Aseguramos DataFrame
+    if not isinstance(df, pd.DataFrame):
+        df = pd.DataFrame(df)
+
+    # ==========================
+    #   MANEJO DEL TIEMPO
+    # ==========================
+    if tiempo is not None:
+        tiempo_str = f"{tiempo:.6f}"
+    else:
+        tiempo_str = "--"
+
+    # ==========================
+    #   DETECCIÓN DE COLUMNAS
+    # ==========================
+    cols = [str(c) for c in df.columns]
+
+    # Columna de iteración (normalmente la primera)
+    col_i = cols[0]
+
+    # Columna de x_n
+    posibles_x = ['Xn', 'xn', 'Xi', 'xi', 'x', 'Xm', 'xm']
+    col_x = None
+    for c in cols:
+        if c in posibles_x:
+            col_x = c
+            break
+    if col_x is None and len(cols) >= 2:
+        col_x = cols[1]
+
+    # Columna de f(x_n)
+    posibles_fx = ['f(Xn)', 'f(xn)', 'f(Xi)', 'f(xi)', 'f(x)', 'f(Xm)', 'f(xm)']
+    col_fx = None
+    for c in cols:
+        if c in posibles_fx:
+            col_fx = c
+            break
+    if col_fx is None and len(cols) >= 3:
+        col_fx = cols[2]
+
+    # Columna de Error (si existe)
+    posibles_err = ['Error', 'error', 'E', 'err']
+    col_err = None
+    for c in cols:
+        if c in posibles_err:
+            col_err = c
+            break
+
+    n_iter_real = len(df)
+    x_final = df[col_x].iloc[-1]
+    fx_final = df[col_fx].iloc[-1]
+
+    if n_iter_real >= 2:
+        x_prev = df[col_x].iloc[-2]
+        delta = x_final - x_prev
+    else:
+        x_prev = x_final
+        delta = 0.0
+
+    # Si existe columna de error, usamos ese valor como "error del modo"
+    if col_err is not None:
+        error_final_modo = df[col_err].iloc[-1]
+    else:
+        # Si no, usamos el error absoluto entre iteraciones
+        error_final_modo = abs(delta)
+
+    # 🔧 Manejo de tolerancia (puede venir None)
+    if tol is not None:
+        convergio_por_tol = abs(error_final_modo) <= tol
+    else:
+        convergio_por_tol = False
+
+    # 🔧 Manejo de niter (puede venir None)
+    if niter is not None:
+        uso_todas_iter = (n_iter_real >= niter)
+    else:
+        uso_todas_iter = False
+
+    # ==========================
+    #   TEXTO RESUMEN
+    # ==========================
+    resumen = []
+
+    resumen.append(
+        f"Se aplicó el método de Newton-Raphson a la función f(x) = {fun_str} "
+        f"con derivada f'(x) = {df_str}, usando x₀ = {x0} como aproximación inicial, "
+        f"tolerancia {tol} y un máximo de {niter} iteraciones."
+    )
+
+    resumen.append(
+        f"El método realizó {n_iter_real} iteraciones y obtuvo como aproximación final x ≈ {x_final:.8f}."
+    )
+
+    resumen.append(
+        f"El error final ({tipo_error}) fue de aproximadamente {error_final_modo:.2e}."
+    )
+
+    if convergio_por_tol:
+        resumen.append(
+            "La aproximación cumple el criterio de parada especificado por la tolerancia, "
+            "por lo que se considera que el método **convergió adecuadamente**."
+        )
+    else:
+        if uso_todas_iter:
+            resumen.append(
+                "El método alcanzó el número máximo de iteraciones sin cumplir la tolerancia, "
+                "por lo que se considera que **no alcanzó la convergencia deseada**."
+            )
+        else:
+            resumen.append(
+                "La tolerancia no se cumplió estrictamente o el método se detuvo por otra condición de parada."
+            )
+
+    if n_iter_real <= 5:
+        comentario_velocidad = "La convergencia fue muy rápida (pocas iteraciones)."
+    elif n_iter_real <= 15:
+        comentario_velocidad = "La cantidad de iteraciones se considera moderada."
+    else:
+        comentario_velocidad = "La cantidad de iteraciones fue alta, lo que indica una convergencia más lenta."
+
+    resumen.append(comentario_velocidad)
+
+    informe_texto = " ".join(resumen)
+
+    # ==========================
+    #   COMPARACIÓN DE ERRORES
+    # ==========================
+    # Error absoluto entre x_n y x_{n-1}
+    error_decimales = abs(delta)
+
+    # Error relativo
+    error_relativo = abs(delta / x_final) if x_final != 0 else 0.0
+
+    # Error en f(x)
+    error_fx = abs(fx_final)
+
+    comparacion_errores = [
+        {
+            "tipo": "decimales",
+            "x_final": x_final,
+            "fx_final": fx_final,
+            "error_final": error_decimales,
+            "tiempo": tiempo_str,
+        },
+        {
+            "tipo": "cifras significativas",
+            "x_final": x_final,
+            "fx_final": fx_final,
+            "error_final": error_relativo,
+            "tiempo": tiempo_str,
+        },
+        {
+            "tipo": "relativo_xnm1",
+            "x_final": x_final,
+            "fx_final": fx_final,
+            "error_final": error_relativo,
+            "tiempo": tiempo_str,
+        },
+        {
+            "tipo": "fx",
+            "x_final": x_final,
+            "fx_final": fx_final,
+            "error_final": error_fx,
+            "tiempo": tiempo_str,
+        },
+    ]
+
+    informe = {
+        "texto": informe_texto,
+        "n_iter_real": n_iter_real,
+        "xm_final": x_final,
+        "error_final": error_final_modo,
+        "convergio_por_tol": convergio_por_tol,
+        "uso_todas_iter": uso_todas_iter,
+        "tipo_error": tipo_error,
+        "comparacion_errores": comparacion_errores,
+    }
+
+    return informe

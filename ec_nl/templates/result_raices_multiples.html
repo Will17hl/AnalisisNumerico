@@ -1,13 +1,70 @@
 {% extends "layout/base.html" %}
 
-{% block title %}sexto Metodo{% endblock %}
+{% block title %}Resultado Método de Raíces Múltiples{% endblock %}
 
 {% block content %}
-    <h1>Resultado del Método de raices multiples</h1>
-    <p>{{ resultado }}</p>
+    <h1>Resultado del Método de Raíces Múltiples</h1>
+
+    <p><strong>Resultado:</strong> {{ resultado }}</p>
+
+    <h3>Tabla de iteraciones</h3>
     {{ tabla|safe }}
-    
-    <h2>Gráfico de la función</h2>
+
+    <h3 class="mt-4">Gráfico de la función</h3>
     <img src="{{ imagen }}" alt="Gráfico de la función" class="img-fluid">
-    <a href="raicesmultiples/">Realizar otro cálculo</a>
-{% endblock content %}
+
+    <br><br>
+    <a href="/raices_multiples/" class="btn btn-secondary mt-3">Realizar otro cálculo</a>
+
+    {% if informe %}
+        <hr class="mt-5">
+
+        <h2>Informe de ejecución - Método de Raíces Múltiples</h2>
+
+        <p style="text-align: justify;">
+            {{ informe.texto }}
+        </p>
+
+        <ul>
+            <li><strong>Iteraciones realizadas:</strong> {{ informe.n_iter_real }}</li>
+            <li><strong>Aproximación final de la raíz:</strong> {{ informe.xm_final }}</li>
+            <li>
+                <strong>Error final ({{ informe.tipo_error }}):</strong>
+                {{ informe.error_final }}
+            </li>
+            <li>
+                <strong>¿Cumplió la tolerancia?</strong>
+                {% if informe.convergio_por_tol %}
+                    Sí
+                {% else %}
+                    No
+                {% endif %}
+            </li>
+        </ul>
+
+        <h3 class="mt-4">Comparación de tipos de error</h3>
+        <table class="table table-striped text-center">
+            <thead>
+                <tr>
+                    <th>Tipo de error</th>
+                    <th>x<sub>final</sub></th>
+                    <th>f(x<sub>final</sub>)</th>
+                    <th>Error final</th>
+                    <th>Tiempo (s)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fila in informe.comparacion_errores %}
+                    <tr>
+                        <td>{{ fila.tipo }}</td>
+                        <td>{{ fila.x_final }}</td>
+                        <td>{{ fila.fx_final }}</td>
+                        <td>{{ fila.error_final }}</td>
+                        <td>{{ fila.tiempo }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+{% endblock %}
